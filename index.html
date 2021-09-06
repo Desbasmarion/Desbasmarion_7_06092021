@@ -4,10 +4,47 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/5521a522f0.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/style.css" />
     <title>Les petits plats</title>
     <link rel="icon" href="assets/logo.svg"/>
 </head>
 <body>
-    <p>hello</p>
+    <header>
+        <img src="assets/logo.svg" alt="logo">
+        <h1 aria-label="name of the company">Les petits plats</h1>
+    </header>
+    <section aria-label="ingredient, device, ustensils search feature">
+        <input type="search" name="input field" placeholder="Rechercher un ingrédient, appareil, ustensiles ou une recette" id="searchArea">
+        <span aria-label="element selected">Coco</span>
+        <select name="ingredients" id="ingredient">
+            <option value="">Ingredients</option>
+        </select>
+        <select name="appareil" id="appareil">
+            <option value="">Appareil</option>
+        </select>
+        <select name="ustensiles" id="ustensiles">
+            <option value="">Ustensiles</option>
+        </select>
+    </section>
+    <main>
+        <article class="recipeCard">
+            <img src="assets/recipe.jpg" alt="recipe image">
+            <h2 aria-label="name of the recipe">Limonade de Coco</h2>
+            <i class="far fa-clock"></i>
+            <span>10 min</span>
+            <ul aria-label="ingredients">
+                <li>
+                    lait de coco...
+                </li>
+            </ul>
+            <p aria-label="instructions">
+                Mettre les glaçons...
+            </p>
+
+        </article>
+    </main>
+
+    <script type="text/javascript" src="js/script.js"></script>
 </body>
 </html>

@@ -1,0 +1,16 @@
+#searchArea{
+    background: url(../assets/search.svg) no-repeat scroll 7px 7px;
+    width: 100%;
+}
+.recipeCard{
+    width: 30%;
+    height: 350px;
+    background-color: #E7E7E7;
+    border-radius: 5px;
+    img{
+        width: 100%;
+        height: 50%;
+        border-radius: 5px 5px 0 0;
+        object-fit: cover;
+    }
+}
