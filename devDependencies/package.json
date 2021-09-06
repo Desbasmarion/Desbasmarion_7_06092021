@@ -1,0 +1,22 @@
+{
+  "name": "projet-7",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Desbasmarion/Desbasmarion_7_06092021.git"
+  },
+  "author": "Marion",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Desbasmarion/Desbasmarion_7_06092021/issues"
+  },
+  "homepage": "https://github.com/Desbasmarion/Desbasmarion_7_06092021#readme",
+  "devDependencies": {
+    "eslint": "^7.32.0"
+  }
+}
