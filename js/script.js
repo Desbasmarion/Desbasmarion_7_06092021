@@ -2,8 +2,6 @@
 const fetchData = () => fetch('data/recipes.json').then(response => response.json()).then(data => data.recipes).catch(err => console.log(err));
 
 //Creation recipes block
-
-//Créer une fonction juste pour mainData puis passer mainData en parametre de fonction creationIndex
 const creationIndex = async() => {
 	let mainData = await fetchData();
 	let main = document.createElement('main');
