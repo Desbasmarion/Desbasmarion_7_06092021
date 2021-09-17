@@ -17,22 +17,31 @@ fetch('data/recipes.json')
 					<span>${element.time}min</span>
 				</div>
 				<div class="ligne2">
-					<ul class="ingredients" aria-label="ingredients">
-					</ul>
 					<p aria-label="instructions">
 					${element.description}
 					</p>
 				</div>`;
-				
-				//let ul = document.querySelector('.ingredients');
+	
+				let ul = document.createElement('ul');
+				element.ingredients.forEach(ingredient => {
+					//Gerer le cas d'absence de quantity et/ou unit 
+					// let unit = [];
+					// unit.innerHTML = `${ingredient.unit}`;
+					// if(unit.innerHTML == undefined) {
+					// 	unit.innerHTML = '';
+					// }
 
-				// element.ingredients.forEach(ingredient => ingredientElement.push(ingredient.ingredient.toLowerCase()));
-				// ingredientElement.forEach(ingredient => {
-				// 	let li = document.createElement('li');
-				// 	li.innerHTML = ingredient;
+					// let quantity = [];
+					// quantity.innerHTML = `:${ingredient.quantity}`;
+					// if(quantity.innerHTML == undefined){
+					// 	quantity.innerHTML = '';
+					// }
 					
-				// 	ul.appendChild(li);
-				// });
+					let li = document.createElement('li');
+					li.innerHTML += `${ingredient.ingredient} ${ingredient.quantity} ${ingredient.unit}`;
+					ul.appendChild(li);
+					article.append(ul);
+				});
 				
 				main.appendChild(article);
 				document.body.appendChild(main);			
@@ -44,48 +53,54 @@ fetch('data/recipes.json')
 		indexCreation(recipes);
 
 		let dataTitle = [];
-		let dataIngredient = [];
+		//let dataIngredient = [];
 		let dataDescription = [];
 
 		//Retrieve data needed to compare to the user input
 		for(let i=0; i<recipes.length; i++){
 			dataTitle.push(recipes[i].name.toLowerCase());
 			dataDescription.push(recipes[i].description.toLowerCase());
-			recipes[i].ingredients.forEach(ingredient => dataIngredient.push(ingredient.ingredient.toLowerCase()));
+			//recipes[i].ingredients.forEach(ingredient => dataIngredient.push(ingredient.ingredient.toLowerCase()));
 		}
 		
-		let allData = dataTitle.concat(dataIngredient, dataDescription);
+		let allData = dataTitle.concat(dataDescription);
 		let arrayFilter = [];
 		let newArray = [];
+		let uniqueArray = [];
 
 		//Comparison between name data and user input
 		let input = document.querySelector('#searchArea');
+
 		input.addEventListener('input', () => {
 			if(input.value.length >= 3){
 				main.innerHTML = '';
 				for(let i=0; i<allData.length; i++){
-					if(allData[i].includes(input.value)){
+					if(allData[i].includes(input.value.toLowerCase())){
 						arrayFilter.push(allData[i]);
-						for(let i=0; i<recipes.length; i++){
-							arrayFilter.forEach(element => {
-								if(recipes[i].name.toLowerCase().includes(element)){
-									newArray.push(recipes[i]);
-								}else if(recipes[i].description.toLowerCase().includes(element)){
-									newArray.push(recipes[i]);
-								}else if(recipes[i].ingredients.forEach(ingredient => ingredient.ingredient.includes(element))){
-									newArray.push(recipes[i]);
-								}
-							});
-						}
-					
-						//Removal of duplicates
-						const uniqueSet = new Set(newArray);
-						const uniqueArray = Array.from(uniqueSet);
-						
-						//Creation index page with recipes filtered
-						indexCreation(uniqueArray);
 					}
+					
 				}
+				for(let i=0; i<recipes.length; i++){
+					arrayFilter.forEach(element => {
+						if(recipes[i].name.toLowerCase().includes(element)){
+							newArray.push(recipes[i]);
+						}else if(recipes[i].description.toLowerCase().includes(element)){
+							newArray.push(recipes[i]);
+						}
+					});
+				}
+				//Removal of duplicates
+				let uniqueSet = new Set(newArray);
+				uniqueArray = Array.from(uniqueSet);
+		
+				//Creation index page with recipes filtered
+				indexCreation(uniqueArray);
+				arrayFilter.splice(0, arrayFilter.length);
+				newArray.splice(0, newArray.length);
+				
+			}else{
+				main.innerHTML = '';
+				indexCreation(recipes);
 			}
 		});	
 	})
