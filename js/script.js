@@ -103,5 +103,105 @@ fetch('data/recipes.json')
 				indexCreation(recipes);
 			}
 		});	
+
+		/////////////////////////////////////TAGS FILTER/////////////////////////////////////
+		let ingredientSelect = document.querySelector('#ingredients');
+		let deviceSelect = document.querySelector('#appareil');
+		let ustensilSelect = document.querySelector('#ustensiles');
+
+		//Recovery ingredients
+		let dataIngredients = []; 
+		recipes.forEach(recipe => recipe.ingredients.forEach(ingredient => dataIngredients.push(ingredient.ingredient.toLowerCase())));
+
+		//Recovery devices
+		let dataDevices = [];
+		recipes.forEach(recipe => dataDevices.push(recipe.appliance.toLowerCase()));
+
+		//Recovery ustensiles 
+		let dataUstensiles = [];
+		recipes.forEach(recipe => recipe.ustensils.forEach(ustensil => dataUstensiles.push(ustensil.toLowerCase())));
+		
+		//Function for creation tags
+		let creationTags = (unique, data, newArray, select) => {
+			unique = new Set(data);
+			newArray = Array.from(unique);
+			newArray.forEach(array => {
+				let option = document.createElement('option');
+				option.innerHTML = array;
+				select.append(option);
+			});
+		};
+
+		//Creation ingredients tags
+		let uniqueIngredients =[];
+		let newArrayIngredients = [];
+
+		creationTags(uniqueIngredients, dataIngredients, newArrayIngredients, ingredientSelect);
+
+		//Creation devices tags
+		let uniqueDevices = [];
+		let newArrayDevices = [];
+
+		creationTags(uniqueDevices, dataDevices, newArrayDevices, deviceSelect);
+
+		//Creation ustensiles tags
+		let uniqueUstensiles = [];
+		let newArrayUstensiles = [];
+
+		creationTags(uniqueUstensiles, dataUstensiles, newArrayUstensiles, ustensilSelect);
+
+		//Filter ingredients tag 
+		let ingredientsFilter = [];
+		
+		ingredientSelect.addEventListener('change', e => {
+			main.innerHTML = '';
+			const element = e.target.value.toLowerCase();
+
+			ingredientsFilter = recipes.filter(recipe => {
+				for(let i=0; i<recipe.ingredients.length;i++){
+					if(recipe.ingredients[i].ingredient.toLowerCase().includes(element)){
+						return true;
+					}
+				}
+			});
+			indexCreation(ingredientsFilter);
+		});
+
+		//Filter devices tag
+		let devicesFilter = [];
+		
+		deviceSelect.addEventListener('change', e => {
+			main.innerHTML = '';
+			const element = e.target.value.toLowerCase();
+
+			devicesFilter = recipes.filter(recipe => {
+				if(recipe.appliance.toLowerCase().includes(element)){
+					return true;
+				}
+			});
+			indexCreation(devicesFilter);
+		});
+
+		//Filter ustensiles tag
+		let ustensilesFilter = [];
+
+		ustensilSelect.addEventListener('change', e => {
+			main.innerHTML = '';
+			const element = e.target.value.toLowerCase();
+
+			let tag = document.createElement('span');
+			tag.classList.add('tag');
+			tag.innerHTML = element;
+			document.body.appendChild(tag);
+
+			ustensilesFilter = recipes.filter(recipe => {
+				for(let i=0; i<recipe.ustensils.length;i++){
+					if(recipe.ustensils[i].toLowerCase().includes(element)){
+						return true;
+					}
+				}
+			});
+			indexCreation(ustensilesFilter);
+		});		
 	})
 	.catch(err => console.log(err));
