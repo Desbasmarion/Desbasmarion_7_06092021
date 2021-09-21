@@ -99,14 +99,46 @@ fetch('data/recipes.json')
 				let uniqueSet = new Set(newArray);
 				uniqueArray = Array.from(uniqueSet);
 		
-				//Creation index page with recipes filtered
+				//Creation index page with recipes filtered + tags filtered 
 				indexCreation(uniqueArray);
+				ingredientSelect.innerHTML = '';
+				deviceSelect.innerHTML = '';
+				ustensilSelect.innerHTML = '';
+				
+				uniqueArray.forEach(recipe => {
+					let optionDevices = document.createElement('option');
+					optionDevices.innerHTML += recipe.appliance;
+					deviceSelect.append(optionDevices);
+
+					recipe.ingredients.forEach(ingredient => {
+						let optionIngredients = document.createElement('option');
+						optionIngredients.innerHTML += ingredient.ingredient;
+						ingredientSelect.append(optionIngredients);
+					});
+
+					recipe.ustensils.forEach(ustensil => {
+						let optionUstensiles = document.createElement('option');
+						optionUstensiles.innerHTML += ustensil;
+						ustensilSelect.append(optionUstensiles);
+					});
+				});
+				
+
 				arrayFilter.splice(0, arrayFilter.length);
 				newArray.splice(0, newArray.length);
 				
 			}else{
+				//Reset recipes
 				main.innerHTML = '';
 				indexCreation(recipes);
+
+				//Reset select options
+				ingredientSelect.innerHTML = '';
+				deviceSelect.innerHTML = '';
+				ustensilSelect.innerHTML = '';
+				creationTags(uniqueIngredients, dataIngredients, newArrayIngredients, ingredientSelect);
+				creationTags(uniqueDevices, dataDevices, newArrayDevices, deviceSelect);
+				creationTags(uniqueUstensiles, dataUstensiles, newArrayUstensiles, ustensilSelect);
 			}
 		});	
 
