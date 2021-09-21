@@ -5,7 +5,7 @@ fetch('data/recipes.json')
 		let main = document.createElement('main');
 		let recipes = data.recipes;
 	
-		//Creation html elements of index page
+		/////////////////////////////////////CREATION INDEX PAGE/////////////////////////////////////
 		const indexCreation = (array) => {
 			array.forEach(element => {
 				let article = document.createElement('article');
@@ -51,7 +51,8 @@ fetch('data/recipes.json')
 
 		//Call the function to create index page
 		indexCreation(recipes);
-
+		
+		/////////////////////////////////////ALGO 1 WITH LOOP/////////////////////////////////////
 		let dataTitle = [];
 		let dataIngredient = [];
 		let dataDescription = [];
@@ -68,7 +69,7 @@ fetch('data/recipes.json')
 		let newArray = [];
 		let uniqueArray = [];
 
-		//Comparison between name data and user input
+		//Comparison between data and user input
 		let input = document.querySelector('#searchArea');
 
 		input.addEventListener('input', () => {
