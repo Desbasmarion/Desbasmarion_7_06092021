@@ -53,17 +53,17 @@ fetch('data/recipes.json')
 		indexCreation(recipes);
 
 		let dataTitle = [];
-		//let dataIngredient = [];
+		let dataIngredient = [];
 		let dataDescription = [];
 
 		//Retrieve data needed to compare to the user input
 		for(let i=0; i<recipes.length; i++){
 			dataTitle.push(recipes[i].name.toLowerCase());
 			dataDescription.push(recipes[i].description.toLowerCase());
-			//recipes[i].ingredients.forEach(ingredient => dataIngredient.push(ingredient.ingredient.toLowerCase()));
+			recipes[i].ingredients.forEach(ingredient => dataIngredient.push(ingredient.ingredient.toLowerCase()));
 		}
 		
-		let allData = dataTitle.concat(dataDescription);
+		let allData = dataTitle.concat(dataDescription, dataIngredient);
 		let arrayFilter = [];
 		let newArray = [];
 		let uniqueArray = [];
@@ -78,10 +78,14 @@ fetch('data/recipes.json')
 					if(allData[i].includes(input.value.toLowerCase())){
 						arrayFilter.push(allData[i]);
 					}
-					
 				}
 				for(let i=0; i<recipes.length; i++){
 					arrayFilter.forEach(element => {
+						recipes[i].ingredients.forEach(ingredient => {
+							if(ingredient.ingredient.toLowerCase().includes(element)){
+								newArray.push(recipes[i]);
+							}
+						});
 						if(recipes[i].name.toLowerCase().includes(element)){
 							newArray.push(recipes[i]);
 						}else if(recipes[i].description.toLowerCase().includes(element)){
@@ -89,6 +93,7 @@ fetch('data/recipes.json')
 						}
 					});
 				}
+				
 				//Removal of duplicates
 				let uniqueSet = new Set(newArray);
 				uniqueArray = Array.from(uniqueSet);
