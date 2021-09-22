@@ -99,12 +99,13 @@ fetch('data/recipes.json')
 				let uniqueSet = new Set(newArray);
 				uniqueArray = Array.from(uniqueSet);
 		
-				//Creation index page with recipes filtered + tags filtered 
+				//Creation index page with recipes filtered
 				indexCreation(uniqueArray);
 				ingredientSelect.innerHTML = '';
 				deviceSelect.innerHTML = '';
 				ustensilSelect.innerHTML = '';
-				
+
+				//Creation tags with recipes filtered
 				uniqueArray.forEach(recipe => {
 					let optionDevices = document.createElement('option');
 					optionDevices.innerHTML += recipe.appliance;
@@ -123,7 +124,12 @@ fetch('data/recipes.json')
 					});
 				});
 				
+				//Recipes filtered with tags filtereds
+				ingredientsTagsFilter(uniqueArray);
+				devicesTagsFilter(uniqueArray);
+				ustensilsTagsFilter(uniqueArray);
 
+				//Remove array
 				arrayFilter.splice(0, arrayFilter.length);
 				newArray.splice(0, newArray.length);
 				
@@ -189,57 +195,68 @@ fetch('data/recipes.json')
 		creationTags(uniqueUstensiles, dataUstensiles, newArrayUstensiles, ustensilSelect);
 
 		//Filter ingredients tag 
-		let ingredientsFilter = [];
-		
-		ingredientSelect.addEventListener('change', e => {
-			main.innerHTML = '';
-			const element = e.target.value.toLowerCase();
+		let ingredientsTagsFilter = (recipes) => {
+			let ingredientsFilter = [];
+					
+			ingredientSelect.addEventListener('change', e => {
+				main.innerHTML = '';
+				const element = e.target.value.toLowerCase();
 
-			ingredientsFilter = recipes.filter(recipe => {
-				for(let i=0; i<recipe.ingredients.length;i++){
-					if(recipe.ingredients[i].ingredient.toLowerCase().includes(element)){
-						return true;
+				ingredientsFilter = recipes.filter(recipe => {
+					for(let i=0; i<recipe.ingredients.length;i++){
+						if(recipe.ingredients[i].ingredient.toLowerCase().includes(element)){
+							return true;
+						}
 					}
-				}
+				});
+				indexCreation(ingredientsFilter);
 			});
-			indexCreation(ingredientsFilter);
-		});
+		};
+		ingredientsTagsFilter(recipes);
+		
 
 		//Filter devices tag
-		let devicesFilter = [];
+		let devicesTagsFilter = (recipes) => {
+			let devicesFilter = [];
 		
-		deviceSelect.addEventListener('change', e => {
-			main.innerHTML = '';
-			const element = e.target.value.toLowerCase();
-
-			devicesFilter = recipes.filter(recipe => {
-				if(recipe.appliance.toLowerCase().includes(element)){
-					return true;
-				}
-			});
-			indexCreation(devicesFilter);
-		});
-
-		//Filter ustensiles tag
-		let ustensilesFilter = [];
-
-		ustensilSelect.addEventListener('change', e => {
-			main.innerHTML = '';
-			const element = e.target.value.toLowerCase();
-
-			let tag = document.createElement('span');
-			tag.classList.add('tag');
-			tag.innerHTML = element;
-			document.body.appendChild(tag);
-
-			ustensilesFilter = recipes.filter(recipe => {
-				for(let i=0; i<recipe.ustensils.length;i++){
-					if(recipe.ustensils[i].toLowerCase().includes(element)){
+			deviceSelect.addEventListener('change', e => {
+				main.innerHTML = '';
+				const element = e.target.value.toLowerCase();
+	
+				devicesFilter = recipes.filter(recipe => {
+					if(recipe.appliance.toLowerCase().includes(element)){
 						return true;
 					}
-				}
+				});
+				indexCreation(devicesFilter);
 			});
-			indexCreation(ustensilesFilter);
-		});		
+		};
+		devicesTagsFilter(recipes);
+		
+
+		//Filter ustensiles tag
+		let ustensilsTagsFilter = (recipes) => {
+			let ustensilesFilter = [];
+
+			ustensilSelect.addEventListener('change', e => {
+				main.innerHTML = '';
+				const element = e.target.value.toLowerCase();
+	
+				let tag = document.createElement('span');
+				tag.classList.add('tag');
+				tag.innerHTML = element;
+				document.body.appendChild(tag);
+	
+				ustensilesFilter = recipes.filter(recipe => {
+					for(let i=0; i<recipe.ustensils.length;i++){
+						if(recipe.ustensils[i].toLowerCase().includes(element)){
+							return true;
+						}
+					}
+				});
+				indexCreation(ustensilesFilter);
+			});		
+		};
+		ustensilsTagsFilter(recipes);
 	})
 	.catch(err => console.log(err));
