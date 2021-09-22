@@ -39,10 +39,11 @@ header h1 {
   border-radius: 5px;
   color: white;
   height: 50px;
-  width: 10%;
+  width: 20%;
   padding-left: 1%;
   margin-right: 1.5%;
   cursor: pointer;
+  font-size: 18px;
 }
 
 #ingredients {
@@ -97,6 +98,13 @@ main {
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  padding-left: 4%;
+  padding-right: 4%;
+}
+
+.recipeCard .ligne1 h2 {
+  font-size: 17px;
+  width: 70%;
 }
 
 .recipeCard .ligne2 {
