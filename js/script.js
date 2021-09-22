@@ -13,8 +13,10 @@ fetch('data/recipes.json')
 				article.innerHTML += `<img src="assets/recipe.jpg" alt="recipe image">
 				<div class="ligne1">
 					<h2 aria-label="name of the recipe">${element.name}</h2>
-					<i class="far fa-clock"></i>
-					<span>${element.time}min</span>
+					<div class="minutes">
+						<i class="far fa-clock"></i>
+						<span>${element.time}min</span>
+					</div>
 				</div>
 				<div class="ligne2">
 					<p aria-label="instructions">
