@@ -18,24 +18,35 @@ fetch('data/recipes.json')
 						<span>${element.time}min</span>
 					</div>
 				</div>
-				<div class="ligne2">
-					<ul class="ingredients" aria-label="ingredients">
-					</ul>
-					<p aria-label="instructions">
-					${element.description}
-					</p>
-				</div>`;
-				
-				//let ul = document.querySelector('.ingredients');
+				`;
 
-				// element.ingredients.forEach(ingredient => ingredientElement.push(ingredient.ingredient.toLowerCase()));
-				// ingredientElement.forEach(ingredient => {
-				// 	let li = document.createElement('li');
-				// 	li.innerHTML = ingredient;
-					
-				// 	ul.appendChild(li);
-				// });
+				let ligne2 = document.createElement('div');
+				ligne2.classList.add('ligne2');
+				let ul = document.createElement('ul');
+				ul.classList.add('ingredients');
+				let instructions = document.createElement('p');
+				instructions.classList.add('instructions');
+				instructions.innerHTML += element.description;
+
 				
+				for (let ingredient of element.ingredients){
+					let li = document.createElement('li');
+				
+					if(ingredient.quantity == undefined){
+						li.innerHTML += `${ingredient.ingredient}`;
+					}else if(ingredient.unit == undefined){
+						li.innerHTML += `${ingredient.ingredient}: ${ingredient.quantity}`;
+					}else{
+						li.innerHTML += `${ingredient.ingredient}: ${ingredient.quantity}${ingredient.unit}`;
+					}
+					
+					ul.appendChild(li);
+				}
+
+				article.appendChild(ligne2);
+				ligne2.appendChild(ul);
+				ligne2.appendChild(instructions);
+
 				main.appendChild(article);
 				document.body.appendChild(main);			
 			});

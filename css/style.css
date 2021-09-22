@@ -44,6 +44,8 @@ header h1 {
   margin-right: 1.5%;
   cursor: pointer;
   font-size: 18px;
+  margin-bottom: 3%;
+  margin-top: 1%;
 }
 
 #ingredients {
@@ -107,15 +109,45 @@ main {
   width: 70%;
 }
 
+.recipeCard .ligne1 span {
+  font-weight: bold;
+}
+
 .recipeCard .ligne2 {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  height: 30%;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding-left: 4%;
+  padding-right: 4%;
+  height: 32%;
+  overflow: hidden;
 }
 
 .recipeCard .ligne2 p {
   font-family: 'Roboto', sans-serif;
+  width: 50%;
+  margin: 0;
+  font-size: 13px;
+  height: 80%;
+  overflow: hidden;
+  text-align: justify;
+}
+
+.recipeCard .ligne2 ul {
+  padding: 0;
+  margin: 0;
+  width: 40%;
+  height: 80%;
+  overflow: hidden;
+}
+
+.recipeCard .ligne2 li {
+  list-style: none;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .recipeCard:hover {
@@ -123,5 +155,34 @@ main {
           transform: scale(1.05);
   -webkit-box-shadow: 5px 10px 14px -6px rgba(0, 0, 0, 0.78);
           box-shadow: 5px 10px 14px -6px rgba(0, 0, 0, 0.78);
+}
+
+@media screen and (max-width: 950px) {
+  #searchArea {
+    background: none;
+    background-color: #E7E7E7;
+  }
+  .recipeCard {
+    width: 45%;
+    margin-bottom: 7%;
+    border-radius: 10px;
+  }
+}
+
+@media screen and (max-width: 655px) {
+  select {
+    display: none;
+  }
+  main {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+  }
+  .recipeCard {
+    width: 100%;
+    margin-bottom: 7%;
+    border-radius: 10px;
+  }
 }
 /*# sourceMappingURL=style.css.map */
