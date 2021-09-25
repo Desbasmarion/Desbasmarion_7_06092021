@@ -3,13 +3,22 @@ fetch('data/recipes.json')
 	.then(response => response.json())
 	.then(data => {
 		let main = document.createElement('main');
+		let selectContainer = document.querySelector('#select');
+		let tagContainer = document.querySelector('#tagContainer');
 		let recipes = data.recipes;
 	
 		/////////////////////////////////////CREATION INDEX PAGE/////////////////////////////////////
 		const indexCreation = (array) => {
 			array.forEach(element => {
+				
 				let article = document.createElement('article');
 				article.classList.add('recipeCard');
+				let arrayUstensiles = [];
+				element.ustensils.filter(ustensil => arrayUstensiles.push(ustensil.toLowerCase()));
+				let arrayIngredients = [];
+				element.ingredients.filter(ingredient => arrayIngredients.push(ingredient.ingredient.toLowerCase()));
+
+				article.dataset.tag = `${element.appliance.toLowerCase()}, ${arrayUstensiles}, ${arrayIngredients}`;
 				article.innerHTML += `<img src="assets/recipe.jpg" alt="recipe image">
 				<div class="ligne1">
 					<h2 aria-label="name of the recipe">${element.name}</h2>
@@ -27,7 +36,6 @@ fetch('data/recipes.json')
 				let instructions = document.createElement('p');
 				instructions.classList.add('instructions');
 				instructions.innerHTML += element.description;
-
 				
 				for (let ingredient of element.ingredients){
 					let li = document.createElement('li');
@@ -58,171 +66,161 @@ fetch('data/recipes.json')
 		/////////////////////////////////////ALGO 2 WITH FILTER() METHOD/////////////////////////////////////
 		let input = document.querySelector('#searchArea');
 
-		input.addEventListener('input', e => {
-			if(input.value.length >= 3){
-				main.innerHTML = '';
-				const element = e.target.value.toLowerCase();
-			
-				const newRecipes = recipes.filter(recipe => {
-					for(let i=0; i<recipe.ingredients.length;i++){
-						if(recipe.name.toLowerCase().includes(element) || recipe.description.toLowerCase().includes(element) || recipe.ingredients[i].ingredient.toLowerCase().includes(element)){
-							return true;
-						}else{
-							// main.innerHTML = 'Aucune recette ne correspond à votre critère... Vous pouvez chercher "tartes aux pommes", "poisson", etc.';
+		let algoSearch = () => {
+			input.addEventListener('input', e => {
+				if(input.value.length >= 3){
+					main.innerHTML = '';
+					const element = e.target.value.toLowerCase();
+				
+					const newRecipes = recipes.filter(recipe => {
+						for(let i=0; i<recipe.ingredients.length;i++){
+							return (recipe.name.toLowerCase().includes(element) || recipe.description.toLowerCase().includes(element) || recipe.ingredients[i].ingredient.toLowerCase().includes(element));
 						}
+					});
+
+					indexCreation(newRecipes);
+					ingredientSelect.innerHTML = '';
+					deviceSelect.innerHTML = '';
+					ustensilSelect.innerHTML = '';
+
+					//Update options tags with 
+					let ingredientsOptions = [];
+					let devicesOptions = [];
+					let ustensilsOptions = [];
+					recoveryDataTags(newRecipes, ingredientsOptions, devicesOptions, ustensilsOptions);
+
+					let uniqueIngOptions = [];
+					let uniqueDevOptions = [];
+					let uniqueUstOptions = [];	
+					optionsSelectInput(uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions);
+
+					if(newRecipes.length == 0){
+						main.innerHTML = 'Aucune recette ne correspond à votre critère... vous pouvez chercher "tarte aux pommes", "poisson", etc.';
 					}
-				});
-				indexCreation(newRecipes);
-				ingredientSelect.innerHTML = '';
-				deviceSelect.innerHTML = '';
-				ustensilSelect.innerHTML = '';
 
-				//Creation tags with recipes filtered
-				newRecipes.forEach(recipe => {
-					let optionDevices = document.createElement('option');
-					optionDevices.innerHTML += recipe.appliance;
-					deviceSelect.append(optionDevices);
-
-					recipe.ingredients.forEach(ingredient => {
-						let optionIngredients = document.createElement('option');
-						optionIngredients.innerHTML += ingredient.ingredient;
-						ingredientSelect.append(optionIngredients);
-					});
-
-					recipe.ustensils.forEach(ustensil => {
-						let optionUstensiles = document.createElement('option');
-						optionUstensiles.innerHTML += ustensil;
-						ustensilSelect.append(optionUstensiles);
-					});
-				});
-				
-				//Recipes filtered with tags filtereds
-				ingredientsTagsFilter(newRecipes);
-				devicesTagsFilter(newRecipes);
-				ustensilsTagsFilter(newRecipes);
-				
-			}else{
-				//Reset recipes
-				main.innerHTML = '';
-				indexCreation(recipes);
-
-				//Reset select options
-				ingredientSelect.innerHTML = '';
-				deviceSelect.innerHTML = '';
-				ustensilSelect.innerHTML = '';
-				creationTags(uniqueIngredients, dataIngredients, newArrayIngredients, ingredientSelect);
-				creationTags(uniqueDevices, dataDevices, newArrayDevices, deviceSelect);
-				creationTags(uniqueUstensiles, dataUstensiles, newArrayUstensiles, ustensilSelect);
-			}
-		});
+					//Recipes filtered with new tags
+					let option = [];
+					let newrecipesTagsFilter = [];
+					filterTags(newRecipes, option, newrecipesTagsFilter);
+	
+				}else{
+					//Reset recipes
+					main.innerHTML = '';
+					indexCreation(recipes);
+	
+					//Reset options tags
+					ingredientSelect.innerHTML = '';
+					deviceSelect.innerHTML = '';
+					ustensilSelect.innerHTML = '';
+	
+					recoveryDataTags(recipes, ingredientsOptions, devicesOptions, ustensilsOptions);
+					optionsSelectInput(uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions);
+					filterTags(recipes, element, recipesTagsFilter);
+				}
+			});	
+		};
+		algoSearch();
 		
 		/////////////////////////////////////TAGS FILTER/////////////////////////////////////
-		let ingredientSelect = document.querySelector('#ingredients');
-		let deviceSelect = document.querySelector('#appareil');
-		let ustensilSelect = document.querySelector('#ustensiles');
-
-		//Recovery ingredients
-		let dataIngredients = []; 
-		recipes.forEach(recipe => recipe.ingredients.forEach(ingredient => dataIngredients.push(ingredient.ingredient.toLowerCase())));
-
-		//Recovery devices
-		let dataDevices = [];
-		recipes.forEach(recipe => dataDevices.push(recipe.appliance.toLowerCase()));
-
-		//Recovery ustensiles 
-		let dataUstensiles = [];
-		recipes.forEach(recipe => recipe.ustensils.forEach(ustensil => dataUstensiles.push(ustensil.toLowerCase())));
 		
-		//Function for creation tags
-		let creationTags = (unique, data, newArray, select) => {
-			unique = new Set(data);
-			newArray = Array.from(unique);
-			newArray.forEach(array => {
+		//Creation tags 
+		let ingredientSelect = document.createElement('select');
+		let deviceSelect = document.createElement('select');
+		let ustensilSelect = document.createElement('select');
+		ingredientSelect.id = 'ingredients';
+		deviceSelect.id = 'appareil';
+		ustensilSelect.id = 'ustensiles';
+		let arraySelects = [ingredientSelect, deviceSelect, ustensilSelect];
+
+		selectContainer.appendChild(ingredientSelect);
+		selectContainer.appendChild(deviceSelect);
+		selectContainer.appendChild(ustensilSelect);
+
+		let ingredientsOptions = [];
+		let devicesOptions = [];
+		let ustensilsOptions = [];
+
+		//Creation options tags
+		let recoveryDataTags = (recipes, ingredientsOptions, devicesOptions, ustensilsOptions) => {
+			//Data ingredients
+			recipes.forEach(recipe => recipe.ingredients.map(ingredient => ingredientsOptions.push(ingredient.ingredient)));
+			//Data devices
+			recipes.forEach(recipe => devicesOptions.push(recipe.appliance));
+			//Data devices
+			recipes.forEach(recipe => recipe.ustensils.map(ustensil => ustensilsOptions.push(ustensil)));
+		};
+		recoveryDataTags(recipes, ingredientsOptions, devicesOptions, ustensilsOptions);
+
+		let uniqueIngOptions = [];
+		let uniqueDevOptions = [];
+		let uniqueUstOptions = [];	
+		
+		let optionsSelectInput = (uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions) => {
+			uniqueIngOptions = [...new Set(ingredientsOptions)];
+			uniqueDevOptions = [...new Set(devicesOptions)];
+			uniqueUstOptions = [...new Set(ustensilsOptions)];	
+
+			let titleIngredient = document.createElement('option');
+			titleIngredient.innerHTML = 'Ingrédients';
+			ingredientSelect.appendChild(titleIngredient);
+
+			let titleDevices = document.createElement('option');
+			titleDevices.innerHTML = 'Appareil';
+			deviceSelect.appendChild(titleDevices);
+
+			let titleUstensils = document.createElement('option');
+			titleUstensils.innerHTML = 'Ustensiles';
+			ustensilSelect.appendChild(titleUstensils);
+
+			uniqueIngOptions.forEach(ingredient => {
 				let option = document.createElement('option');
-				option.innerHTML = array;
-				select.append(option);
+				option.innerHTML = ingredient;
+				ingredientSelect.appendChild(option);
+			});
+			uniqueDevOptions.forEach(device => {
+				let option = document.createElement('option');
+				option.innerHTML = device;
+				deviceSelect.appendChild(option);
+			});
+			uniqueUstOptions.forEach(ustensil => {
+				let option = document.createElement('option');
+				option.innerHTML = ustensil;
+				ustensilSelect.appendChild(option);
 			});
 		};
+		optionsSelectInput(uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions);
+		
+		let element = [];
+		let recipesTagsFilter = [];
 
-		//Creation ingredients tags
-		let uniqueIngredients =[];
-		let newArrayIngredients = [];
+		let filterTags = (recipes, element, recipesTagsFilter) => {
+			arraySelects.forEach(select => {
+				select.addEventListener('change', e => {
+					main.innerHTML ='';
 
-		creationTags(uniqueIngredients, dataIngredients, newArrayIngredients, ingredientSelect);
-
-		//Creation devices tags
-		let uniqueDevices = [];
-		let newArrayDevices = [];
-
-		creationTags(uniqueDevices, dataDevices, newArrayDevices, deviceSelect);
-
-		//Creation ustensiles tags
-		let uniqueUstensiles = [];
-		let newArrayUstensiles = [];
-
-		creationTags(uniqueUstensiles, dataUstensiles, newArrayUstensiles, ustensilSelect);
-
-		//Filter ingredients tag 
-		let ingredientsTagsFilter = (recipes) => {
-			let ingredientsFilter = [];
+					if(element.indexOf(e.currentTarget.value) === -1){
+						element.push(e.currentTarget.value);
+					}else{
+						element.pop();
+					}
 					
-			ingredientSelect.addEventListener('change', e => {
-				main.innerHTML = '';
-				const element = e.target.value.toLowerCase();
+					let tag = document.createElement('span');
+					tag.classList.add('tag');
+					tag.innerHTML = element;
+					tagContainer.appendChild(tag);
 
-				ingredientsFilter = recipes.filter(recipe => {
-					for(let i=0; i<recipe.ingredients.length;i++){
-						if(recipe.ingredients[i].ingredient.toLowerCase().includes(element)){
-							return true;
-						}
-					}
+					recipesTagsFilter = recipes.filter(recipe => 
+						element.every(elt => {
+							for(let i=0; i<recipe.ingredients.length; i++){
+								return (recipe.ustensils.includes(elt) || recipe.appliance.includes(elt) ||  recipe.ingredients.some(ingredient => ingredient.ingredient.includes(elt)));
+							}
+						}) 
+					);
+					indexCreation(recipesTagsFilter);
+					
 				});
-				indexCreation(ingredientsFilter);
 			});
 		};
-		ingredientsTagsFilter(recipes);
-		
-		//Filter devices tag
-		let devicesTagsFilter = (recipes) => {
-			let devicesFilter = [];
-		
-			deviceSelect.addEventListener('change', e => {
-				main.innerHTML = '';
-				const element = e.target.value.toLowerCase();
-	
-				devicesFilter = recipes.filter(recipe => {
-					if(recipe.appliance.toLowerCase().includes(element)){
-						return true;
-					}
-				});
-				indexCreation(devicesFilter);
-			});
-		};
-		devicesTagsFilter(recipes);
-		
-		//Filter ustensiles tag
-		let ustensilsTagsFilter = (recipes) => {
-			let ustensilesFilter = [];
-
-			ustensilSelect.addEventListener('change', e => {
-				main.innerHTML = '';
-				const element = e.target.value.toLowerCase();
-	
-				let tag = document.createElement('span');
-				tag.classList.add('tag');
-				tag.innerHTML = element;
-				document.body.appendChild(tag);
-	
-				ustensilesFilter = recipes.filter(recipe => {
-					for(let i=0; i<recipe.ustensils.length;i++){
-						if(recipe.ustensils[i].toLowerCase().includes(element)){
-							return true;
-						}
-					}
-				});
-				indexCreation(ustensilesFilter);
-			});		
-		};
-		ustensilsTagsFilter(recipes);	
+		filterTags(recipes, element, recipesTagsFilter);
 	});
 

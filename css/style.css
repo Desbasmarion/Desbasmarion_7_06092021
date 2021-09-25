@@ -26,12 +26,20 @@ header h1 {
   font-family: sans-serif;
 }
 
+#tagContainer {
+  margin-top: 2%;
+  margin-bottom: 2%;
+  text-align: left;
+}
+
 .tag {
   border-radius: 5px;
-  padding: 0.5%;
-  background-color: blue;
+  padding: 1%;
   margin-right: 1%;
-  margin-top: 1%;
+}
+
+#select {
+  text-align: left;
 }
 
 #ingredients, #appareil, #ustensiles {
@@ -44,8 +52,8 @@ header h1 {
   margin-right: 1.5%;
   cursor: pointer;
   font-size: 18px;
-  margin-bottom: 3%;
-  margin-top: 1%;
+  margin-bottom: 2%;
+  font-weight: bold;
 }
 
 #ingredients {
@@ -134,6 +142,7 @@ main {
   height: 80%;
   overflow: hidden;
   text-align: justify;
+  font-style: italic;
 }
 
 .recipeCard .ligne2 ul {
