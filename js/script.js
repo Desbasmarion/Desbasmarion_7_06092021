@@ -1,15 +1,23 @@
-//Data recovery
 fetch('data/recipes.json')
 	.then(response => response.json())
 	.then(data => {
 		let main = document.createElement('main');
+		let selectContainer = document.querySelector('#select');
+		let tagContainer = document.querySelector('#tagContainer');
 		let recipes = data.recipes;
 	
 		/////////////////////////////////////CREATION INDEX PAGE/////////////////////////////////////
 		const indexCreation = (array) => {
 			array.forEach(element => {
+				
 				let article = document.createElement('article');
 				article.classList.add('recipeCard');
+				let arrayUstensiles = [];
+				element.ustensils.filter(ustensil => arrayUstensiles.push(ustensil.toLowerCase()));
+				let arrayIngredients = [];
+				element.ingredients.filter(ingredient => arrayIngredients.push(ingredient.ingredient.toLowerCase()));
+
+				article.dataset.tag = `${element.appliance.toLowerCase()}, ${arrayUstensiles}, ${arrayIngredients}`;
 				article.innerHTML += `<img src="assets/recipe.jpg" alt="recipe image">
 				<div class="ligne1">
 					<h2 aria-label="name of the recipe">${element.name}</h2>
@@ -18,37 +26,37 @@ fetch('data/recipes.json')
 						<span>${element.time}min</span>
 					</div>
 				</div>
-				<div class="ligne2">
-					<p aria-label="instructions">
-					${element.description}
-					</p>
-				</div>`;
-	
-				let ul = document.createElement('ul');
-				element.ingredients.forEach(ingredient => {
-					//Gerer le cas d'absence de quantity et/ou unit 
-					// let unit = [];
-					// unit.innerHTML = `${ingredient.unit}`;
-					// if(unit.innerHTML == undefined) {
-					// 	unit.innerHTML = '';
-					// }
+				`;
 
-					// let quantity = [];
-					// quantity.innerHTML = `:${ingredient.quantity}`;
-					// if(quantity.innerHTML == undefined){
-					// 	quantity.innerHTML = '';
-					// }
-					
-					let li = document.createElement('li');
-					li.innerHTML += `${ingredient.ingredient} ${ingredient.quantity} ${ingredient.unit}`;
-					ul.appendChild(li);
-					article.append(ul);
-				});
+				let ligne2 = document.createElement('div');
+				ligne2.classList.add('ligne2');
+				let ul = document.createElement('ul');
+				ul.classList.add('ingredients');
+				let instructions = document.createElement('p');
+				instructions.classList.add('instructions');
+				instructions.innerHTML += element.description;
 				
+				for (let ingredient of element.ingredients){
+					let li = document.createElement('li');
+				
+					if(ingredient.quantity == undefined){
+						li.innerHTML += `${ingredient.ingredient}`;
+					}else if(ingredient.unit == undefined){
+						li.innerHTML += `${ingredient.ingredient}: ${ingredient.quantity}`;
+					}else{
+						li.innerHTML += `${ingredient.ingredient}: ${ingredient.quantity}${ingredient.unit}`;
+					}
+					
+					ul.appendChild(li);
+				}
+
+				article.appendChild(ligne2);
+				ligne2.appendChild(ul);
+				ligne2.appendChild(instructions);
+
 				main.appendChild(article);
 				document.body.appendChild(main);			
 			});
-			
 		};
 
 		//Call the function to create index page
@@ -100,165 +108,183 @@ fetch('data/recipes.json')
 				//Removal of duplicates
 				let uniqueSet = new Set(newArray);
 				uniqueArray = Array.from(uniqueSet);
-		
+				
 				//Creation index page with recipes filtered
 				indexCreation(uniqueArray);
 				ingredientSelect.innerHTML = '';
 				deviceSelect.innerHTML = '';
 				ustensilSelect.innerHTML = '';
 
-				//Creation tags with recipes filtered
-				uniqueArray.forEach(recipe => {
-					let optionDevices = document.createElement('option');
-					optionDevices.innerHTML += recipe.appliance;
-					deviceSelect.append(optionDevices);
+				//Update options tags 
+				let ingredientsOptions = [];
+				let devicesOptions = [];
+				let ustensilsOptions = [];
+				recoveryDataTags(uniqueArray, ingredientsOptions, devicesOptions, ustensilsOptions);
 
-					recipe.ingredients.forEach(ingredient => {
-						let optionIngredients = document.createElement('option');
-						optionIngredients.innerHTML += ingredient.ingredient;
-						ingredientSelect.append(optionIngredients);
-					});
+				let uniqueIngOptions = [];
+				let uniqueDevOptions= [];
+				let uniqueUstOptions= [];	
+				optionsSelectInput(uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions);
 
-					recipe.ustensils.forEach(ustensil => {
-						let optionUstensiles = document.createElement('option');
-						optionUstensiles.innerHTML += ustensil;
-						ustensilSelect.append(optionUstensiles);
-					});
-				});
-				
-				//Recipes filtered with tags filtereds
-				ingredientsTagsFilter(uniqueArray);
-				devicesTagsFilter(uniqueArray);
-				ustensilsTagsFilter(uniqueArray);
+				//Recipes filtered with new tags
+				let newRecipesTagsFilter = [];
+				filterTags(uniqueArray, element, newRecipesTagsFilter);
 
-				//Remove array
-				arrayFilter.splice(0, arrayFilter.length);
-				newArray.splice(0, newArray.length);
-				
 			}else{
 				//Reset recipes
 				main.innerHTML = '';
 				indexCreation(recipes);
 
-				//Reset select options
+				//Reset options tags
 				ingredientSelect.innerHTML = '';
 				deviceSelect.innerHTML = '';
 				ustensilSelect.innerHTML = '';
-				creationTags(uniqueIngredients, dataIngredients, newArrayIngredients, ingredientSelect);
-				creationTags(uniqueDevices, dataDevices, newArrayDevices, deviceSelect);
-				creationTags(uniqueUstensiles, dataUstensiles, newArrayUstensiles, ustensilSelect);
+
+				optionsSelectInput(uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions);
+				filterTags(recipes, element, recipesTagsFilter);
 			}
 		});	
+				
 
 		/////////////////////////////////////TAGS FILTER/////////////////////////////////////
-		let ingredientSelect = document.querySelector('#ingredients');
-		let deviceSelect = document.querySelector('#appareil');
-		let ustensilSelect = document.querySelector('#ustensiles');
+		//Creation select for tags 
+		let ingredientSelect = document.createElement('select');
+		let deviceSelect = document.createElement('select');
+		let ustensilSelect = document.createElement('select');
+		ingredientSelect.id = 'ingredients';
+		deviceSelect.id = 'appareil';
+		ustensilSelect.id = 'ustensiles';
+		let arraySelects = [ingredientSelect, deviceSelect, ustensilSelect];
 
-		//Recovery ingredients
-		let dataIngredients = []; 
-		recipes.forEach(recipe => recipe.ingredients.forEach(ingredient => dataIngredients.push(ingredient.ingredient.toLowerCase())));
+		selectContainer.appendChild(ingredientSelect);
+		selectContainer.appendChild(deviceSelect);
+		selectContainer.appendChild(ustensilSelect);
 
-		//Recovery devices
-		let dataDevices = [];
-		recipes.forEach(recipe => dataDevices.push(recipe.appliance.toLowerCase()));
+		let ingredientsOptions = [];
+		let devicesOptions = [];
+		let ustensilsOptions = [];
 
-		//Recovery ustensiles 
-		let dataUstensiles = [];
-		recipes.forEach(recipe => recipe.ustensils.forEach(ustensil => dataUstensiles.push(ustensil.toLowerCase())));
-		
-		//Function for creation tags
-		let creationTags = (unique, data, newArray, select) => {
-			unique = new Set(data);
-			newArray = Array.from(unique);
-			newArray.forEach(array => {
+		//Recovery data for options tags
+		let recoveryDataTags = (recipes, ingredientsOptions, devicesOptions, ustensilsOptions) => {
+			//Data ingredients
+			recipes.forEach(recipe => recipe.ingredients.map(ingredient => ingredientsOptions.push(ingredient.ingredient)));
+			//Data devices
+			recipes.forEach(recipe => devicesOptions.push(recipe.appliance));
+			//Data devices
+			recipes.forEach(recipe => recipe.ustensils.map(ustensil => ustensilsOptions.push(ustensil)));
+		};
+		recoveryDataTags(recipes, ingredientsOptions, devicesOptions, ustensilsOptions);
+
+		let uniqueIngOptions = [];
+		let uniqueDevOptions = [];
+		let uniqueUstOptions = [];	
+
+		//Creation options tags
+		let optionsSelectInput = (uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions) => {
+			uniqueIngOptions = [...new Set(ingredientsOptions)];
+			uniqueDevOptions = [...new Set(devicesOptions)];
+			uniqueUstOptions = [...new Set(ustensilsOptions)];	
+
+			let titleIngredient = document.createElement('option');
+			titleIngredient.value = '';
+			titleIngredient.innerHTML = 'Ingrédients';
+			ingredientSelect.prepend(titleIngredient);
+
+			let titleDevices = document.createElement('option');
+			titleDevices.value = '';
+			titleDevices.innerHTML = 'Appareil';
+			deviceSelect.prepend(titleDevices);
+
+			let titleUstensils = document.createElement('option');
+			titleUstensils.value = '';
+			titleUstensils.innerHTML = 'Ustensiles';
+			ustensilSelect.prepend(titleUstensils);
+
+			uniqueIngOptions.forEach(ingredient => {
 				let option = document.createElement('option');
-				option.innerHTML = array;
-				select.append(option);
+				option.value = ingredient;
+				option.innerHTML = ingredient;
+				ingredientSelect.appendChild(option);
+			});
+			uniqueDevOptions.forEach(device => {
+				let option = document.createElement('option');
+				option.value = device;
+				option.innerHTML = device;
+				deviceSelect.appendChild(option);
+			});
+			uniqueUstOptions.forEach(ustensil => {
+				let option = document.createElement('option');
+				option.value = ustensil;
+				option.innerHTML = ustensil;
+				ustensilSelect.appendChild(option);
 			});
 		};
+		optionsSelectInput(uniqueIngOptions, uniqueDevOptions, uniqueUstOptions, ingredientsOptions, devicesOptions, ustensilsOptions);
+		
+		let element = [];
+		let recipesTagsFilter = [];
+		let tag = [];
 
-		//Creation ingredients tags
-		let uniqueIngredients =[];
-		let newArrayIngredients = [];
+		//Filter recipes with options tags
+		let filterTags = (recipes, element, recipesTagsFilter) => {
+			arraySelects.forEach(select => {
+				select.addEventListener('input', ev => {
+					main.innerHTML ='';
 
-		creationTags(uniqueIngredients, dataIngredients, newArrayIngredients, ingredientSelect);
+					//Creation span tag + styles 
+					if(element.indexOf(ev.currentTarget.value) === -1 && ev.currentTarget.value != ''){
+						element.push(ev.currentTarget.value);
 
-		//Creation devices tags
-		let uniqueDevices = [];
-		let newArrayDevices = [];
+						tag = document.createElement('span');
+						tag.classList.add('tag');
+						tag.innerHTML = ev.currentTarget.value;
+						tagContainer.appendChild(tag);
 
-		creationTags(uniqueDevices, dataDevices, newArrayDevices, deviceSelect);
-
-		//Creation ustensiles tags
-		let uniqueUstensiles = [];
-		let newArrayUstensiles = [];
-
-		creationTags(uniqueUstensiles, dataUstensiles, newArrayUstensiles, ustensilSelect);
-
-		//Filter ingredients tag 
-		let ingredientsTagsFilter = (recipes) => {
-			let ingredientsFilter = [];
+						tag.innerHTML += '<i class=\'far fa-times-circle\'></i>';
+						
+						recipes.forEach(recipe => {
+							for(let i=0; i<recipe.ingredients.length; i++){
+								if(recipe.ustensils.includes(ev.currentTarget.value)){
+									tag.style.color = '#FFFFFF';
+									tag.style.backgroundColor = '#ED6454';
+								}
+								if(recipe.appliance.includes(ev.currentTarget.value)){
+									tag.style.color = '#FFFFFF';
+									tag.style.backgroundColor = '#68D9A4';
+								}
+								if(recipe.ingredients.some(ingredient => ingredient.ingredient.includes(ev.currentTarget.value))){
+									tag.style.color = '#FFFFFF';
+									tag.style.backgroundColor = '#3282F7';
+								}
+							}
+						});
+					}
 					
-			ingredientSelect.addEventListener('change', e => {
-				main.innerHTML = '';
-				const element = e.target.value.toLowerCase();
+					recipesTagsFilter = recipes.filter(recipe => 
+						element.every(elt => {
+							for(let i=0; i<recipe.ingredients.length; i++){
+								return (recipe.ustensils.includes(elt) || recipe.appliance.includes(elt) ||  recipe.ingredients.some(ingredient => ingredient.ingredient.includes(elt)));
+							}
+						}) 
+					);
+					indexCreation(recipesTagsFilter);
+					ingredientSelect.innerHTML = '';
+					deviceSelect.innerHTML = '';
+					ustensilSelect.innerHTML = '';
 
-				ingredientsFilter = recipes.filter(recipe => {
-					for(let i=0; i<recipe.ingredients.length;i++){
-						if(recipe.ingredients[i].ingredient.toLowerCase().includes(element)){
-							return true;
-						}
-					}
+					//Update options tags with 
+					let ingredientsOptionsTags = [];
+					let devicesOptionsTags = [];
+					let ustensilsOptionsTags = [];
+					recoveryDataTags(recipesTagsFilter, ingredientsOptionsTags, devicesOptionsTags, ustensilsOptionsTags);
+
+					let uniqueUstOptionsTags = [];
+					let uniqueDevOptionsTags = [];
+					let uniqueIngOptionsTags = [];
+					optionsSelectInput(uniqueIngOptionsTags, uniqueDevOptionsTags, uniqueUstOptionsTags, ingredientsOptionsTags, devicesOptionsTags, ustensilsOptionsTags);
 				});
-				indexCreation(ingredientsFilter);
 			});
 		};
-		ingredientsTagsFilter(recipes);
-		
-
-		//Filter devices tag
-		let devicesTagsFilter = (recipes) => {
-			let devicesFilter = [];
-		
-			deviceSelect.addEventListener('change', e => {
-				main.innerHTML = '';
-				const element = e.target.value.toLowerCase();
-	
-				devicesFilter = recipes.filter(recipe => {
-					if(recipe.appliance.toLowerCase().includes(element)){
-						return true;
-					}
-				});
-				indexCreation(devicesFilter);
-			});
-		};
-		devicesTagsFilter(recipes);
-		
-
-		//Filter ustensiles tag
-		let ustensilsTagsFilter = (recipes) => {
-			let ustensilesFilter = [];
-
-			ustensilSelect.addEventListener('change', e => {
-				main.innerHTML = '';
-				const element = e.target.value.toLowerCase();
-	
-				let tag = document.createElement('span');
-				tag.classList.add('tag');
-				tag.innerHTML = element;
-				document.body.appendChild(tag);
-	
-				ustensilesFilter = recipes.filter(recipe => {
-					for(let i=0; i<recipe.ustensils.length;i++){
-						if(recipe.ustensils[i].toLowerCase().includes(element)){
-							return true;
-						}
-					}
-				});
-				indexCreation(ustensilesFilter);
-			});		
-		};
-		ustensilsTagsFilter(recipes);
+		filterTags(recipes, element, recipesTagsFilter);
 	})
 	.catch(err => console.log(err));
